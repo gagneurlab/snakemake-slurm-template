@@ -1,0 +1,13 @@
+
+files = ["test-1", "test-2", "test-3", "test-4", "test-5"]
+rule all:
+  input:
+    expand("{filename}.txt", filename = files)
+    
+rule hello_world:
+  resources:
+    mem_mb=50
+  output:
+    "{filename}.txt"
+  shell: 
+    "echo Hello World > {output}"
