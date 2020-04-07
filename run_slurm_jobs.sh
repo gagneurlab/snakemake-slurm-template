@@ -81,6 +81,6 @@ $snakemake --keep-going \
                              --output $output_files \
                              --job-name=$job_names" \
             --jobs $number_of_snakemake_jobs \
-            --snakefile $snakefile
+            --snakefile $snakefile \
             --verbose
             #--rerun-incomplete
