@@ -5,6 +5,7 @@ rule all:
     
 rule hello_world:
   resources:
+    ntasks=1
     threads=4
     mem_mb=50
   output:
