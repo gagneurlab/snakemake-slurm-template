@@ -72,7 +72,6 @@ auks -a
 
 
 $snakemake --keep-going \
-          --default-resources ntasks=1 threads=1 mem_mb=1000 \
           --cluster "sbatch  --ntasks {resources.ntasks} \
                              --cpus-per-task {resources.threads} \
                              --parsable \
