@@ -21,6 +21,10 @@ set -e
 # otherwise specify absolute path to snakemake binary
 snakemake="snakemake"
 
+# Change kinit path to use system kerberos instead of potential conda
+# installed versions
+kinit="/usr/bin/kinit"
+
 # The name of the snakefile
 snakefile="Snakefile"
 
@@ -64,7 +68,7 @@ fi
 # Run the snakemake file on the cluster
 
 # Fetch kerberos ticket that lasts for 7 days
-kinit -r 7d
+$kinit -r 7d
 
 # Auks argument caches the kerberos ticket for runs that last more than
 # one day (otherwise the jobs lose access to the filesystem)
