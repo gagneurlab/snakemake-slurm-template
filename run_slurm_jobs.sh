@@ -22,7 +22,7 @@ set -e
 snakemake="snakemake"
 
 # The name of the snakefile
-snakefile="snakefile"
+snakefile="Snakefile"
 
 # The number of snakemake jobs
 number_of_snakemake_jobs="1"
