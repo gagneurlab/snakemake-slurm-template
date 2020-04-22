@@ -4,9 +4,9 @@ rule all:
     expand("{filename}.txt", filename = files)
     
 rule hello_world:
+  threads: 4
   resources:
     ntasks=1,
-    threads=4,
     mem_mb=50
   output:
     "{filename}.txt"

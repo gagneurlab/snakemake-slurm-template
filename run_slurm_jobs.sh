@@ -21,7 +21,7 @@ set -e
 # otherwise specify absolute path to snakemake binary
 snakemake="snakemake"
 
-# The name of the snakefile 
+# The name of the snakefile
 snakefile="snakefile"
 
 # The number of snakemake jobs
@@ -30,7 +30,7 @@ number_of_snakemake_jobs="1"
 #### IMPORTANT!!!
 # Make a environment variable for the project folder
 # e.g. project_folder="/path/to/project/folder/"
-project_folder="$(dirname $snakefile)" 
+project_folder="$(dirname $snakefile)"
 
 # Set the log folder path
 logs="$project_folder/logs"
@@ -51,7 +51,7 @@ output_files="$logs/$job_names-%A.out"
 if [[ ! -e $logs ]]; then
     mkdir $logs
     echo "New folder created under $logs"
-else 
+else
     echo "Folder $logs was not created because it already exists..."
 fi
 
@@ -66,14 +66,15 @@ fi
 # Fetch kerberos ticket that lasts for 7 days
 kinit -r 7d
 
-# Auks argument caches the kerberos ticket for runs that last more than 
+# Auks argument caches the kerberos ticket for runs that last more than
 # one day (otherwise the jobs lose access to the filesystem)
 auks -a
 
 
 $snakemake --keep-going \
+          --default-resources ntasks=1 mem_mb=1000 \
           --cluster "sbatch  --ntasks {resources.ntasks} \
-                             --cpus-per-task {resources.threads} \
+                             --cpus-per-task {threads} \
                              --parsable \
                              --auks=done \
                              --mem {resources.mem_mb}M \
