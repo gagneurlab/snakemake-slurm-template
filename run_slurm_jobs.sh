@@ -7,6 +7,8 @@
 #
 # Fail the script if one command fails
 set -e
+# enable debug mode
+set -x
 
 # ============================================================================
 #
@@ -76,7 +78,7 @@ auks -a
 
 $snakemake --keep-going \
            --default-resources ntasks=1 mem_mb=1000 \
-           --cluster "sbatch --ntasks {resources.ntasks} \
+           --cluster "sbatch $SBATCH_ARGS --ntasks {resources.ntasks} \
                              --cpus-per-task {threads} \
                              --parsable \
                              --auks=done \
