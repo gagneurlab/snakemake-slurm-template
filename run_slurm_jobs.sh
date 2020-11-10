@@ -74,17 +74,16 @@ $kinit -r 7d
 # one day (otherwise the jobs lose access to the filesystem)
 auks -a
 
-
 $snakemake --keep-going \
-          --default-resources ntasks=1 mem_mb=1000 \
-          --cluster "sbatch  --ntasks {resources.ntasks} \
+           --default-resources ntasks=1 mem_mb=1000 \
+           --cluster "sbatch --ntasks {resources.ntasks} \
                              --cpus-per-task {threads} \
                              --parsable \
                              --auks=done \
                              --mem {resources.mem_mb}M \
                              --output $output_files \
                              --job-name=$job_names" \
-            --jobs $number_of_snakemake_jobs \
-            --snakefile $snakefile \
-            --verbose
-            #--rerun-incomplete
+           --jobs $number_of_snakemake_jobs \
+           --snakefile $snakefile $@
+           # --verbose
+           # --rerun-incomplete
