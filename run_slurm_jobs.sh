@@ -7,8 +7,8 @@
 #
 # Fail the script if one command fails
 set -e
-# enable debug mode
-set -x
+# # enable debug mode
+# set -x
 
 # limit core dumps to 50MB
 ulimit -c 102400
