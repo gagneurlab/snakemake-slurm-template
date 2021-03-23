@@ -34,7 +34,7 @@ kinit="/usr/bin/kinit"
 snakefile="Snakefile"
 
 # The number of snakemake jobs
-number_of_snakemake_jobs="200"
+number_of_snakemake_jobs="${N_JOBS:-20}"
 
 #### IMPORTANT!!!
 # Make a environment variable for the project folder
@@ -47,7 +47,7 @@ logs="$project_folder/logs"
 
 # Set the job name for the job that will be spawned
 job_names="${project_name}-$(date +"%Y-%m-%d_%T")"
-echo "Starting $job_names..."
+echo "Starting $job_names with $number_of_snakemake_jobs jobs..."
 
 cluster_status_script="${project_folder}/slurm-status.py"
 
