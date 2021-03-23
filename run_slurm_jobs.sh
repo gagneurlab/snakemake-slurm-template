@@ -10,6 +10,9 @@ set -e
 # enable debug mode
 set -x
 
+# limit core dumps to 50MB
+ulimit -c 102400
+
 # ============================================================================
 #
 # 1) Make sure that you have snakemake installed in your $PATH
@@ -31,19 +34,22 @@ kinit="/usr/bin/kinit"
 snakefile="Snakefile"
 
 # The number of snakemake jobs
-number_of_snakemake_jobs="1"
+number_of_snakemake_jobs="200"
 
 #### IMPORTANT!!!
 # Make a environment variable for the project folder
 # e.g. project_folder="/path/to/project/folder/"
 project_folder="$(dirname $snakefile)"
+project_name="$(basename $(realpath $project_folder))"
 
 # Set the log folder path
 logs="$project_folder/logs"
 
 # Set the job name for the job that will be spawned
-job_names="test-job"
+job_names="${project_name}-$(date +"%Y-%m-%d_%T")"
+echo "Starting $job_names..."
 
+cluster_status_script="${project_folder}/slurm-status.py"
 
 # ============================================================================
 
@@ -54,38 +60,48 @@ job_names="test-job"
 output_files="$logs/$job_names-%A.out"
 
 # Create the log folder if it does not exist
-if [[ ! -e $logs ]]; then
-    mkdir $logs
-    echo "New folder created under $logs"
-else
-    echo "Folder $logs was not created because it already exists..."
+if [[ ! -e "$logs" ]]; then
+    mkdir "$logs"
+    echo "New logs folder created under $logs"
 fi
 
-# Clear the logs/ folder
-if [ "$(ls -A $logs)" ]; then
-    echo "Clear $logs from old files"
-    rm $logs/*
-fi
+# register cleanup function to stop still running snakemake jobs
+function cleanup {
+  echo "cancel still running jobs..."
+  squeue -u $USER -o "%j,%i,%T,%B,%A,%N" | grep "^$job_names" | cut -f2 -d',' | xargs -r scancel
+}
+
+trap cleanup EXIT
 
 # Run the snakemake file on the cluster
 
-# Fetch kerberos ticket that lasts for 7 days
-$kinit -r 7d
+if [ "${AUKS_ENABLED:-false}" = true ]; then
+    # Fetch kerberos ticket that lasts for 7 days
+    $kinit -r 7d
 
-# Auks argument caches the kerberos ticket for runs that last more than
-# one day (otherwise the jobs lose access to the filesystem)
-auks -a
+    # Auks argument caches the kerberos ticket for runs that last more than
+    # one day (otherwise the jobs lose access to the filesystem)
+    auks -a
+    SBATCH_ARGS="${SBATCH_ARGS} --auks=done"
+fi
 
 $snakemake --keep-going \
-           --default-resources ntasks=1 mem_mb=1000 \
+           --default-resources ntasks=1 mem_mb=1000 gpu=0 \
            --cluster "sbatch $SBATCH_ARGS --ntasks {resources.ntasks} \
                              --cpus-per-task {threads} \
                              --parsable \
-                             --auks=done \
                              --mem {resources.mem_mb}M \
                              --output $output_files \
-                             --job-name=$job_names" \
+                             --no-requeue \
+                             --job-name=$job_names-{rule} \
+                             --gres=gpu:{resources.gpu} \
+                     " \
+           --cluster-status="${cluster_status_script}" \
            --jobs $number_of_snakemake_jobs \
-           --snakefile $snakefile $@
+           --snakefile $snakefile "$@"
            # --verbose
            # --rerun-incomplete
+
+
+
+
