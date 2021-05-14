@@ -39,8 +39,9 @@ number_of_snakemake_jobs="${N_JOBS:-20}"
 #### IMPORTANT!!!
 # Make a environment variable for the project folder
 # e.g. project_folder="/path/to/project/folder/"
-project_folder="$(dirname $snakefile)"
-project_name="$(basename $(realpath $project_folder))"
+project_folder="$(dirname "$snakefile")"
+project_folder="$(realpath "$project_folder")"
+project_name="$(basename "$project_folder")"
 
 # Set the log folder path
 logs="$project_folder/logs"
