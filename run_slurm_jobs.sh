@@ -31,10 +31,10 @@ snakemake="snakemake"
 kinit="/usr/bin/kinit"
 
 # The name of the snakefile
-snakefile="Snakefile"
+snakefile="${SNAKEFILE:-Snakefile}"
 
-# The number of snakemake jobs
-number_of_snakemake_jobs="${N_JOBS:-20}"
+# The number of snakemake cores
+number_of_snakemake_cores="${N_CORES:-64}"
 
 #### IMPORTANT!!!
 # Make a environment variable for the project folder
@@ -48,7 +48,7 @@ logs="$project_folder/logs"
 
 # Set the job name for the job that will be spawned
 job_names="${project_name}-$(date +"%Y-%m-%d_%T")"
-echo "Starting $job_names with $number_of_snakemake_jobs jobs..."
+echo "Starting $job_names with $number_of_snakemake_cores cores..."
 
 cluster_status_script="${project_folder}/slurm-status.py"
 
@@ -98,7 +98,7 @@ $snakemake --keep-going \
                              --gres=gpu:{resources.gpu} \
                      " \
            --cluster-status="${cluster_status_script}" \
-           --jobs $number_of_snakemake_jobs \
+           --cores $number_of_snakemake_cores \
            --snakefile $snakefile "$@"
            # --verbose
            # --rerun-incomplete

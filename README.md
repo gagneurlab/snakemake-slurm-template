@@ -13,6 +13,6 @@
 
 Examples:
 - `run_slurm_jobs.sh --rerun-incomplete --restart-times 3`
-- It is possible to change slurm arguments and number of jobs on the command line:
-  `N_JOBS=10 SBATCH_ARGS="--partition=slurm-ouga --exclude=gpu01" run_slurm_jobs.sh --rerun-incomplete`
+- It is possible to change slurm arguments and number of total cores on the command line:
+  `SNAKEFILE="scripts/Snakefile" N_CORES=32 SBATCH_ARGS="--partition=slurm-ouga --exclude=gpu01" ./run_slurm_jobs.sh --rerun-incomplete`
 
