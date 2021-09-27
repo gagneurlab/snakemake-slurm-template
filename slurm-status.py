@@ -9,6 +9,15 @@ import argparse
 
 logger = logging.getLogger("__name__")
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("slurm-status.log"),
+#        logging.StreamHandler()
+    ]
+)
+
 parser = argparse.ArgumentParser(description='Get the status of some slurm job.')
 parser.add_argument(
     '--status_attempts',
@@ -42,18 +51,6 @@ else:
     cluster = ""
 
 for i in range(STATUS_ATTEMPTS):
-    try:
-        sacct_res = sp.check_output(shlex.split(f"sacct {cluster} -P -b -j {jobid} -n"))
-        res = {
-            x.split("|")[0]: x.split("|")[1]
-            for x in sacct_res.decode().strip().split("\n")
-        }
-        break
-    except sp.CalledProcessError as e:
-        logger.error("sacct process error")
-        logger.error(e)
-    except IndexError as e:
-        pass
     # Try getting job with scontrol instead in case sacct is misconfigured
     try:
         sctrl_res = sp.check_output(
@@ -61,6 +58,8 @@ for i in range(STATUS_ATTEMPTS):
         )
         m = re.search(r"JobState=(\w+)", sctrl_res.decode())
         res = {jobid: m.group(1)}
+        m = re.search(r"Requeue=(\w+)", sctrl_res.decode())
+        res["requeue"] = m.group(1)
         break
     except sp.CalledProcessError as e:
         logger.error("scontrol process error")
@@ -74,22 +73,33 @@ for i in range(STATUS_ATTEMPTS):
 status = res[jobid]
 
 if status == "BOOT_FAIL":
+    logger.info(sctrl_res.decode())
     print("failed")
 elif status == "OUT_OF_MEMORY":
+    logger.info(sctrl_res.decode())
     print("failed")
 elif status.startswith("CANCELLED"):
+    logger.info(sctrl_res.decode())
     print("failed")
 elif status == "COMPLETED":
     print("success")
 elif status == "DEADLINE":
+    logger.info(sctrl_res.decode())
     print("failed")
 elif status == "FAILED":
+    logger.info(sctrl_res.decode())
     print("failed")
 elif status == "NODE_FAIL":
+    logger.info(sctrl_res.decode())
     print("failed")
 elif status == "PREEMPTED":
-    print("failed")
+    logger.info(sctrl_res.decode())
+    if res.get("requeue", "") == "1":
+        print("running")
+    else:
+        print("failed")
 elif status == "TIMEOUT":
+    logger.info(sctrl_res.decode())
     print("failed")
 # Unclear whether SUSPENDED should be treated as running or failed
 elif status == "SUSPENDED":

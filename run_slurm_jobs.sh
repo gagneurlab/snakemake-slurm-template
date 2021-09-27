@@ -75,6 +75,7 @@ function cleanup {
 trap cleanup EXIT
 
 # Run the snakemake file on the cluster
+SBATCH_ARGS="${SBATCH_ARGS} --requeue"
 
 if [ "${AUKS_ENABLED:-false}" = true ]; then
     # Fetch kerberos ticket that lasts for 7 days
@@ -93,12 +94,13 @@ $snakemake --keep-going \
                              --parsable \
                              --mem {resources.mem_mb}M \
                              --output $output_files \
-                             --no-requeue \
+                             --requeue \
                              --job-name=$job_names-{rule} \
                              --gres=gpu:{resources.gpu} \
                      " \
            --cluster-status="${cluster_status_script}" \
            --cores $number_of_snakemake_cores \
+           -j $number_of_snakemake_cores \
            --snakefile $snakefile "$@"
            # --verbose
            # --rerun-incomplete
