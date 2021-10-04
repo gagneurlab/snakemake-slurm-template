@@ -74,7 +74,9 @@ function cleanup {
 
 trap cleanup EXIT
 
-# Run the snakemake file on the cluster
+## Run the snakemake file on the cluster
+
+# requeue jobs in case of preemption
 SBATCH_ARGS="${SBATCH_ARGS} --requeue"
 
 if [ "${AUKS_ENABLED:-false}" = true ]; then
@@ -89,12 +91,12 @@ fi
 
 $snakemake --keep-going \
            --default-resources ntasks=1 mem_mb=1000 gpu=0 \
-           --cluster "sbatch $SBATCH_ARGS --ntasks {resources.ntasks} \
+           --cluster "sbatch $SBATCH_ARGS \
+                             --ntasks {resources.ntasks} \
                              --cpus-per-task {threads} \
                              --parsable \
                              --mem {resources.mem_mb}M \
                              --output $output_files \
-                             --requeue \
                              --job-name=$job_names-{rule} \
                              --gres=gpu:{resources.gpu} \
                      " \
