@@ -34,7 +34,8 @@ kinit="/usr/bin/kinit"
 snakefile="${SNAKEFILE:-Snakefile}"
 
 # The number of snakemake cores
-number_of_snakemake_cores="${N_CORES:-64}"
+number_of_snakemake_cores="${N_CORES:-256}"
+number_of_snakemake_jobs="${N_JOBS:-100}"
 
 #### IMPORTANT!!!
 # Make a environment variable for the project folder
@@ -102,7 +103,7 @@ $snakemake --keep-going \
                      " \
            --cluster-status="${cluster_status_script}" \
            --cores $number_of_snakemake_cores \
-           -j $number_of_snakemake_cores \
+           -j $number_of_snakemake_jobs \
            --snakefile $snakefile "$@"
            # --verbose
            # --rerun-incomplete
