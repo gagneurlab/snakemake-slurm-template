@@ -72,11 +72,12 @@ def run_scontrol(cluster, jobid):
     m = re.search(r"JobState=(\w+)", sctrl_res.decode())
     res = {jobid: m.group(1)}
 
-    m = re.search(r"Requeue=(\w+)", sctrl_res.decode())
-    requeueable = m.group(1)
+    if res[jobid] == "PREEMPTED":
+        m = re.search(r"Requeue=(\w+)", sctrl_res.decode())
+        requeueable = m.group(1)
 
-    if requeueable == "1":
-        res = {jobid: "REQUEUED"}
+        if requeueable == "1":
+            res[jobid] = "REQUEUED"
 
     return res
 
