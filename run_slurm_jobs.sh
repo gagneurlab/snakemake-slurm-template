@@ -59,7 +59,7 @@ cluster_status_script="${project_folder}/slurm-status.py"
 # so here we store the successfull outputs as .out files
 # and the errors as .error files
 
-output_files="$logs/$job_names-%A.out"
+output_files="$logs/%A-$job_names.out"
 
 # Create the log folder if it does not exist
 if [[ ! -e "$logs" ]]; then
