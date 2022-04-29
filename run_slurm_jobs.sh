@@ -35,7 +35,9 @@ snakefile="${SNAKEFILE:-Snakefile}"
 
 # The number of snakemake cores
 number_of_snakemake_cores="${N_CORES:-256}"
-number_of_snakemake_jobs="${N_JOBS:-100}"
+number_of_snakemake_jobs="${N_JOBS:-128}"
+amount_of_snakemake_memory="${MEM_MB:-1000000}"
+number_of_snakemake_gpus="${N_GPUS:-8}"
 
 #### IMPORTANT!!!
 # Make a environment variable for the project folder
@@ -49,7 +51,11 @@ logs="$project_folder/logs"
 
 # Set the job name for the job that will be spawned
 job_names="${project_name}-$(date +"%Y-%m-%d_%T")"
-echo "Starting $job_names with $number_of_snakemake_cores cores..."
+echo "Starting $job_names with up to:"
+echo "- $number_of_snakemake_cores cores"
+echo "- $number_of_snakemake_jobs jobs"
+echo "- ${amount_of_snakemake_memory}MB of RAM"
+echo "- $number_of_snakemake_gpus gpus"
 
 cluster_status_script="${project_folder}/slurm-status.py"
 
@@ -104,6 +110,7 @@ $snakemake --keep-going \
            --cluster-status="${cluster_status_script}" \
            --cores $number_of_snakemake_cores \
            -j $number_of_snakemake_jobs \
+           --resources mem_mb=$amount_of_snakemake_memory gpu=$number_of_snakemake_gpus \
            --snakefile $snakefile "$@"
            # --verbose
            # --rerun-incomplete
