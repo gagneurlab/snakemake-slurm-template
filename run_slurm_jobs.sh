@@ -13,6 +13,8 @@ set -e
 # limit core dumps to 50MB
 ulimit -c 102400
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 # ============================================================================
 #
 # 1) Make sure that you have snakemake installed in your $PATH
@@ -25,6 +27,7 @@ ulimit -c 102400
 # Use the default snakemake command determined by your $PATH
 # otherwise specify absolute path to snakemake binary
 snakemake="snakemake"
+
 
 # Change kinit path to use system kerberos instead of potential conda
 # installed versions
@@ -57,7 +60,7 @@ echo "- $number_of_snakemake_jobs jobs"
 echo "- ${amount_of_snakemake_memory}MB of RAM"
 echo "- $number_of_snakemake_gpus gpus"
 
-cluster_status_script="${project_folder}/slurm-status.py"
+cluster_status_script="${SCRIPT_DIR}/slurm-status.py"
 
 # ============================================================================
 

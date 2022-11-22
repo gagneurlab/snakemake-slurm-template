@@ -7,7 +7,8 @@
 - Allows specifying `threads`, `mem_mb` and `gpu` resources
 
 ## Usage
-1) Copy `run_slurm_jobs` and `slurm_status.py` to your project directory
+1) Copy `run_slurm_jobs` and `slurm_status.py` to any directory in your $PATH.
+   Make sure that both files are in the same directory.
 2) If needed, change the `Snakefile` path in `run_slurm_jobs`
 3) Simply replace your `snakemake <additional args>` call with `./run_slurm_jobs <additional args>`
 
