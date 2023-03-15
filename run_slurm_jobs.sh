@@ -9,6 +9,7 @@
 set -e
 # # enable debug mode
 # set -x
+# export SNAKEMAKE_SLURM_DEBUG=1
 
 # limit core dumps to 50MB
 ulimit -c 102400
@@ -60,7 +61,16 @@ echo "- $number_of_snakemake_jobs jobs"
 echo "- ${amount_of_snakemake_memory}MB of RAM"
 echo "- $number_of_snakemake_gpus gpus"
 
-cluster_status_script="${SCRIPT_DIR}/slurm-status.py"
+snakemake_version="$($snakemake --version | sed -e 's/\([0-9]\+\).*/\1/')"
+if [ "$snakemake_version" -gt "6" ]; then
+	# snakemake supports the cluster-sidecar script
+    cluster_status_script="--cluster-status=${SCRIPT_DIR}/slurm-status.sh"
+    cluster_sidecar_script="--cluster-sidecar=${SCRIPT_DIR}/slurm-sidecar.py"
+else
+    # snakemake does not support cluster-sidecar script; use legacy polling instead
+    cluster_status_script="--cluster-status=${SCRIPT_DIR}/slurm-status.py"
+    cluster_sidecar_script=""
+fi
 
 # ============================================================================
 
@@ -100,23 +110,24 @@ if [ "${AUKS_ENABLED:-false}" = true ]; then
 fi
 
 $snakemake --keep-going \
-           --default-resources ntasks=1 mem_mb=1000 gpu=0 \
-           --cluster "sbatch $SBATCH_ARGS \
-                             --ntasks {resources.ntasks} \
-                             --cpus-per-task {threads} \
-                             --parsable \
-                             --mem {resources.mem_mb}M \
-                             --output $output_files \
-                             --job-name=$job_names-{rule} \
-                             --gres=gpu:{resources.gpu} \
-                     " \
-           --cluster-status="${cluster_status_script}" \
-           --cores $number_of_snakemake_cores \
-           -j $number_of_snakemake_jobs \
-           --resources mem_mb=$amount_of_snakemake_memory gpu=$number_of_snakemake_gpus \
-           --snakefile $snakefile "$@"
-           # --verbose
-           # --rerun-incomplete
+  --default-resources ntasks=1 mem_mb=1000 gpu=0 \
+  --cluster "sbatch $SBATCH_ARGS \
+    --ntasks {resources.ntasks} \
+    --cpus-per-task {threads} \
+    --parsable \
+    --mem {resources.mem_mb}M \
+    --output $output_files \
+    --job-name=$job_names-{rule} \
+    --gres=gpu:{resources.gpu} \
+  " \
+  ${cluster_status_script} \
+  ${cluster_sidecar_script} \
+  --cores $number_of_snakemake_cores \
+  -j $number_of_snakemake_jobs \
+  --resources mem_mb=$amount_of_snakemake_memory gpu=$number_of_snakemake_gpus \
+  --snakefile $snakefile "$@"
+  # --verbose
+  # --rerun-incomplete
 
 
 
