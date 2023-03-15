@@ -47,6 +47,9 @@ parser = argparse.ArgumentParser(description=textwrap.dedent("""
     Run a Snakemake v7+ sidecar process for Slurm.
     This sidecar process will poll `squeue --user [user] --format='%i,%T'` 
     every 5 seconds by default.
+
+    The first output line will be a cURL command that can be used to query job states in the following manner:
+    `curl -s [...] http://localhost:<port>/job/status/$JOBID_OF_INTEREST`
 """))
 parser.add_argument(
     "--cluster",
