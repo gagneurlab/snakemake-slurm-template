@@ -125,7 +125,7 @@ def decide_return_value(jobid, status_attempts, preempt_retry=True, default="run
     status = get_state(jobid, status_attempts)
     logger.info("%s: '%s'", jobid, status)
 
-    if status.startswith("CANCELLED by") or status in [
+    if status.startswith("CANCELLED") or status in [
         "BOOT_FAIL",
         "OUT_OF_MEMORY",
         "DEADLINE",
