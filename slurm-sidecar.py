@@ -209,7 +209,7 @@ class PollSqueueThread(threading.Thread):
         self.states.setdefault(jobid, None)
 
     def _decide_return_value(self, jobid, status, default="running"):
-        if status.startswith("CANCELLED by") or status in [
+        if status.startswith("CANCELLED") or status in [
             "BOOT_FAIL",
             "OUT_OF_MEMORY",
             "DEADLINE",
@@ -262,11 +262,15 @@ class PollSqueueThread(threading.Thread):
         if try_num >= self.max_tries:
             raise Exception("Problem with call to %s" % cmd)
         else:
-            parsed = {
-                x.split("|")[0]: x.split("|")[1] for x in output.strip().split("\n")
-            }
-            logger.debug("Returning state of %s as %s", jobid, parsed[jobid])
-            return parsed[jobid]
+            try:
+                parsed = {
+                    x.split("|")[0]: x.split("|")[1] for x in output.strip().split("\n")
+                }
+                logger.debug("Returning state of %s as %s", jobid, parsed[jobid])
+                return parsed[jobid]
+            except Exception as e:
+                logging.exception("Failed to parse sacct output: '%s', error: %s", output)
+                raise e
 
     def stop(self):
         """Flag thread to stop execution"""
