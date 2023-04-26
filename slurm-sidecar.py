@@ -268,9 +268,16 @@ class PollSqueueThread(threading.Thread):
                 }
                 logger.debug("Returning state of %s as %s", jobid, parsed[jobid])
                 return parsed[jobid]
-            except Exception as e:
-                logging.exception("Failed to parse sacct output: '%s', error: %s", output, e)
-                raise e
+            except IndexError as e:
+                logging.exception(
+                    "Failed to parse sacct output for job %s: '%s'\n\tCommand: '%s'\n\tTry: %s\n\tError: %s",
+                    jobid,
+                    output,
+                    cmd,
+                    try_num,
+                    e
+                )
+                return "UNKNOWN"
 
     def stop(self):
         """Flag thread to stop execution"""
